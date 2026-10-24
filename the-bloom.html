@@ -1,0 +1,846 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Bloom</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --night-bg-1: #101A15;
+    --night-bg-2: #1B2B21;
+
+    --dawn-1: #FFF8EF;
+    --dawn-2: #FFE4CE;
+
+    --leaf: #6C9A79;
+    --leaf-deep: #3F6350;
+    --leaf-light: #B7D4BE;
+    --leaf-pale: #E6F0E5;
+    --gold: #D9A566;
+    --firefly: #F2C879;
+
+    --flower-pink: #E8A6B8;
+    --flower-lav: #C9B6DE;
+    --flower-gold: #F0D48A;
+
+    --ink: #3A332C;
+    --ink-on-dark: #EDEBE4;
+    --ink-soft-dark: #9FB0A5;
+    --ink-soft-light: #8A8078;
+
+    --ease-slow: cubic-bezier(0.22, 0.61, 0.36, 1);
+    --ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-bloom: cubic-bezier(0.34, 1.15, 0.4, 1);
+
+    --space-1: 8px;
+    --space-2: 16px;
+    --space-3: 28px;
+    --space-4: 48px;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin: 0; padding: 0; height: 100%;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+  }
+
+  body{
+    display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(120% 100% at 50% 30%, var(--night-bg-2), var(--night-bg-1) 70%);
+    transition: background 2.6s var(--ease-slow);
+    position: relative;
+  }
+
+  body.dawn{
+    background: radial-gradient(120% 100% at 50% 25%, var(--dawn-1), var(--dawn-2) 90%);
+  }
+
+  .stars{
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      radial-gradient(1.5px 1.5px at 20% 25%, rgba(237,235,228,0.5), transparent),
+      radial-gradient(1.5px 1.5px at 70% 15%, rgba(237,235,228,0.4), transparent),
+      radial-gradient(1px 1px at 85% 40%, rgba(237,235,228,0.35), transparent),
+      radial-gradient(1px 1px at 35% 60%, rgba(237,235,228,0.3), transparent),
+      radial-gradient(1.5px 1.5px at 55% 12%, rgba(237,235,228,0.4), transparent);
+    opacity: 0.8;
+    transition: opacity 2.2s var(--ease-slow);
+  }
+  body.dawn .stars{ opacity: 0; }
+
+  /* ---------- FIREFLIES — irregular paths, independent flicker ---------- */
+
+  .fireflies{
+    position: fixed; inset: 0; pointer-events: none; z-index: 1;
+    transition: opacity 1.8s var(--ease-slow);
+  }
+  body.dawn .fireflies{ opacity: 0; }
+
+  .firefly{
+    position: absolute;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--firefly);
+    box-shadow: 0 0 6px 2px rgba(242,200,121,0.7), 0 0 14px 5px rgba(242,200,121,0.25);
+  }
+
+  .firefly.f1{ left: 12%; top: 70%; animation: fly1 19s ease-in-out infinite, blinkA 3.1s ease-in-out infinite; }
+  .firefly.f2{ left: 78%; top: 55%; animation: fly2 23s ease-in-out infinite, blinkB 3.8s ease-in-out infinite; animation-delay: -4s, -1s; }
+  .firefly.f3{ left: 30%; top: 30%; animation: fly3 21s ease-in-out infinite, blinkC 2.7s ease-in-out infinite; animation-delay: -9s, -0.5s; }
+  .firefly.f4{ left: 60%; top: 78%; animation: fly4 17s ease-in-out infinite, blinkA 4.2s ease-in-out infinite; animation-delay: -6s, -2s; }
+  .firefly.f5{ left: 85%; top: 22%; animation: fly5 25s ease-in-out infinite, blinkB 3.4s ease-in-out infinite; animation-delay: -12s, -1.5s; }
+  .firefly.f6{ left: 8%; top: 40%; animation: fly6 20s ease-in-out infinite, blinkC 3.6s ease-in-out infinite; animation-delay: -3s, -2.5s; }
+
+  @keyframes fly1{
+    0%{ transform: translate(0,0); }
+    18%{ transform: translate(6vw,-8vh); animation-timing-function: ease-out; }
+    38%{ transform: translate(3vw,-18vh); }
+    55%{ transform: translate(11vw,-14vh); animation-timing-function: ease-in; }
+    75%{ transform: translate(8vw,-4vh); }
+    100%{ transform: translate(0,0); }
+  }
+  @keyframes fly2{
+    0%{ transform: translate(0,0); }
+    20%{ transform: translate(-7vw,-6vh); }
+    45%{ transform: translate(-4vw,-16vh); animation-timing-function: ease-in-out; }
+    68%{ transform: translate(-10vw,-9vh); }
+    100%{ transform: translate(0,0); }
+  }
+  @keyframes fly3{
+    0%{ transform: translate(0,0); }
+    25%{ transform: translate(5vw,10vh); }
+    50%{ transform: translate(9vw,3vh); animation-timing-function: ease-out; }
+    72%{ transform: translate(2vw,12vh); }
+    100%{ transform: translate(0,0); }
+  }
+  @keyframes fly4{
+    0%{ transform: translate(0,0); }
+    22%{ transform: translate(-6vw,-10vh); }
+    48%{ transform: translate(-9vw,-2vh); }
+    70%{ transform: translate(-3vw,-13vh); animation-timing-function: ease-in; }
+    100%{ transform: translate(0,0); }
+  }
+  @keyframes fly5{
+    0%{ transform: translate(0,0); }
+    30%{ transform: translate(-8vw,8vh); }
+    55%{ transform: translate(-13vw,2vh); }
+    80%{ transform: translate(-5vw,10vh); }
+    100%{ transform: translate(0,0); }
+  }
+  @keyframes fly6{
+    0%{ transform: translate(0,0); }
+    20%{ transform: translate(7vw,5vh); }
+    44%{ transform: translate(4vw,14vh); }
+    66%{ transform: translate(10vw,9vh); }
+    100%{ transform: translate(0,0); }
+  }
+
+  @keyframes blinkA{ 0%,100%{ opacity: 0.15; } 50%{ opacity: 1; } }
+  @keyframes blinkB{ 0%,100%{ opacity: 0.9; } 40%{ opacity: 0.2; } 70%{ opacity: 0.7; } }
+  @keyframes blinkC{ 0%,100%{ opacity: 0.3; } 30%{ opacity: 0.85; } 60%{ opacity: 0.1; } 85%{ opacity: 0.6; } }
+
+  /* ---------- DAWN LIGHT MOTES + RAYS ---------- */
+
+  .light-layer{
+    position: fixed; inset: 0; pointer-events: none; z-index: 1;
+    opacity: 0;
+    transition: opacity 2.4s var(--ease-slow) 0.6s;
+  }
+  body.dawn .light-layer{ opacity: 1; }
+
+  .ray{
+    position: absolute;
+    top: -10%;
+    width: 140px;
+    height: 130%;
+    background: linear-gradient(to bottom, rgba(255,246,230,0.35), transparent 75%);
+    filter: blur(6px);
+    animation: raySway 12s ease-in-out infinite;
+  }
+  .ray.r1{ left: 18%; transform: rotate(8deg); animation-duration: 14s; }
+  .ray.r2{ left: 62%; transform: rotate(-6deg); animation-duration: 11s; animation-delay: -4s; }
+
+  @keyframes raySway{
+    0%,100%{ opacity: 0.6; }
+    50%{ opacity: 1; }
+  }
+
+  .mote{
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,244,222,0.9), rgba(255,244,222,0));
+  }
+  .mote.m1{ width: 6px; height: 6px; left: 22%; bottom: -5%; animation: moteUp 16s linear infinite; }
+  .mote.m2{ width: 4px; height: 4px; left: 68%; bottom: -5%; animation: moteUp 19s linear infinite; animation-delay: -5s; }
+  .mote.m3{ width: 5px; height: 5px; left: 45%; bottom: -5%; animation: moteUp 22s linear infinite; animation-delay: -10s; }
+  .mote.m4{ width: 3px; height: 3px; left: 80%; bottom: -5%; animation: moteUp 17s linear infinite; animation-delay: -3s; }
+  .mote.m5{ width: 4px; height: 4px; left: 10%; bottom: -5%; animation: moteUp 20s linear infinite; animation-delay: -8s; }
+
+  @keyframes moteUp{
+    0%{ transform: translate(0,0); opacity: 0; }
+    10%{ opacity: 0.8; }
+    90%{ opacity: 0.5; }
+    100%{ transform: translate(14px,-100vh); opacity: 0; }
+  }
+
+  .grain{
+    position: fixed; inset: 0; pointer-events: none; opacity: 0.04; z-index: 1;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .stage{
+    position: relative; z-index: 2;
+    width: min(92vw, 460px);
+    height: min(90vh, 680px);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+
+  .sound-toggle{
+    position: absolute; top: 6px; right: 6px;
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 1px solid rgba(159,176,165,0.35);
+    background: rgba(255,255,255,0.04);
+    color: var(--ink-soft-dark);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; cursor: pointer;
+    transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease;
+    z-index: 5;
+  }
+  body.dawn .sound-toggle{
+    color: var(--ink-soft-light);
+    border-color: rgba(58,51,44,0.18);
+    background: rgba(255,255,255,0.5);
+  }
+  .sound-toggle:focus-visible{ outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  /* ---------- PLANT ZONE ---------- */
+
+  .plant-zone{
+    position: relative;
+    width: 280px;
+    height: 320px;
+  }
+
+  /* garden bed */
+  .garden-bed{
+    position: absolute;
+    bottom: 14px; left: 50%;
+    width: 220px; height: 30px;
+    margin-left: -110px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at 40% 30%, #4A3B2C, #241B15 78%);
+    opacity: 0.92;
+  }
+
+  .grass{
+    position: absolute;
+    bottom: 20px;
+    width: 3px;
+    border-radius: 2px 2px 0 0;
+    background: linear-gradient(to top, var(--leaf-deep), var(--leaf));
+    transform-origin: bottom center;
+    opacity: 0;
+    animation: growIn 1.4s var(--ease-settle) forwards;
+  }
+  @keyframes growIn{ from{ transform: scaleY(0); opacity:0; } to{ transform: scaleY(1); opacity: 0.85; } }
+
+  .grass.g1{ left: 92px; height: 16px; animation-delay: 0.2s; }
+  .grass.g2{ left: 102px; height: 22px; animation-delay: 0.5s; }
+  .grass.g3{ left: 176px; height: 18px; animation-delay: 0.3s; }
+  .grass.g4{ left: 188px; height: 13px; animation-delay: 0.7s; }
+  .grass.g5{ left: 66px; height: 14px; animation-delay: 0.9s; }
+
+  /* small companion flowers scattered in the garden */
+  .mini-flower{
+    position: absolute;
+    bottom: 22px;
+    width: 22px; height: 22px;
+    opacity: 0;
+    animation: growIn 1.6s var(--ease-settle) forwards;
+    transform-origin: bottom center;
+  }
+  .mini-flower.mf1{ left: 190px; animation-delay: 0.6s; }
+  .mini-flower.mf2{ left: 60px; animation-delay: 1.1s; }
+
+  /* the ONE flower — "you are my one and only flower" — present from the start, distinct glow */
+  .the-one-flower{
+    position: absolute;
+    bottom: 28px; left: 22px;
+    width: 40px; height: 40px;
+    filter: drop-shadow(0 0 10px rgba(232,166,184,0.55));
+    animation: theOnePulse 4.4s ease-in-out infinite;
+    transition: filter 1.6s ease;
+  }
+  body.dawn .the-one-flower{
+    filter: drop-shadow(0 0 6px rgba(232,166,184,0.3));
+  }
+  @keyframes theOnePulse{
+    0%,100%{ transform: scale(1); }
+    50%{ transform: scale(1.06); }
+  }
+
+  /* ---------- SAPLING (SVG, hand-drawn growth) ---------- */
+
+  .stem-wrap{
+    position: absolute;
+    bottom: 26px; left: 50%;
+    width: 40px; height: 150px;
+    margin-left: -20px;
+  }
+
+  .stem-wrap svg{ width: 100%; height: 100%; overflow: visible; }
+
+  #stemPath{
+    fill: none;
+    stroke: url(#stemGrad);
+    stroke-width: 4;
+    stroke-linecap: round;
+  }
+
+  .side-leaf{
+    opacity: 0;
+    transform: scale(0.3);
+    transform-origin: center;
+    transition: opacity 0.8s var(--ease-settle), transform 0.8s var(--ease-settle);
+  }
+  .side-leaf.show{ opacity: 1; transform: scale(1); }
+
+  .seed{
+    position: absolute;
+    bottom: 24px; left: 50%;
+    width: 8px; height: 8px;
+    margin-left: -4px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 10px 2px rgba(217,165,102,0.55);
+    animation: seedGlow 2.6s ease-in-out infinite;
+    transition: opacity 0.6s ease;
+  }
+  @keyframes seedGlow{
+    0%,100%{ transform: scale(1); box-shadow: 0 0 8px 2px rgba(217,165,102,0.4); }
+    50%{ transform: scale(1.25); box-shadow: 0 0 14px 4px rgba(217,165,102,0.65); }
+  }
+  .growth-stage.grown .seed{ opacity: 0; }
+
+  /* ---------- LEAF CLUSTER ---------- */
+
+  .leaf-cluster{
+    position: absolute;
+    left: 50%; bottom: 176px;
+    width: 0; height: 0;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+  .growth-stage.grown .leaf-cluster{ opacity: 1; }
+
+  /* central bud node — the visible origin point every leaf unfurls from */
+  .bud-node{
+    position: absolute;
+    left: -6px; top: -6px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--leaf-light), var(--leaf-deep));
+    box-shadow: 0 0 6px rgba(63,99,80,0.5);
+    z-index: 2;
+  }
+
+  .leaf-slot{
+    position: absolute;
+    left: 0; top: 0;
+    width: 76px; height: 96px;
+    margin-left: -38px; margin-top: -96px;
+    transform-origin: 50% 100%;
+  }
+  .leaf-slot.a{ transform: rotate(-8deg); }
+  .leaf-slot.b{ transform: rotate(112deg); }
+  .leaf-slot.c{ transform: rotate(238deg); }
+
+  .leaf-shape{
+    width: 100%; height: 100%;
+    transform: scaleY(0.08) scaleX(0.4) skewY(14deg);
+    transform-origin: 50% 100%;
+    opacity: 0;
+    filter: drop-shadow(0 6px 10px rgba(16,26,21,0.35));
+  }
+  .leaf-slot.a .leaf-shape{ transition: transform 1.15s var(--ease-bloom), opacity 0.85s var(--ease-settle); }
+  .leaf-slot.b .leaf-shape{ transition: transform 1.45s var(--ease-bloom), opacity 0.85s var(--ease-settle); }
+  .leaf-slot.c .leaf-shape{ transition: transform 1.0s var(--ease-bloom), opacity 0.85s var(--ease-settle); }
+
+  .leaf-slot.a.open .leaf-shape{ transform: scaleY(1) scaleX(1) skewY(-3deg); opacity: 1; }
+  .leaf-slot.b.open .leaf-shape{ transform: scaleY(1) scaleX(1) skewY(4deg); opacity: 1; }
+  .leaf-slot.c.open .leaf-shape{ transform: scaleY(1) scaleX(1) skewY(-2deg); opacity: 1; }
+
+  .growth-stage.bloomed .leaf-cluster{ animation: sway 6s ease-in-out infinite; }
+  @keyframes sway{
+    0%,100%{ transform: translateX(0) rotate(0deg); }
+    50%{ transform: translateX(1.5px) rotate(0.6deg); }
+  }
+
+  .center-mark{
+    position: absolute;
+    left: 50%; bottom: 176px;
+    width: 14px; height: 14px;
+    margin-left: -7px; margin-top: -7px;
+    border-radius: 50%;
+    opacity: 0;
+    box-shadow: 0 0 0 0 rgba(217,165,102,0.5);
+  }
+  .growth-stage.bloomed .center-mark{
+    opacity: 1;
+    animation: pulseMark 2.4s ease-out 1;
+  }
+  @keyframes pulseMark{
+    0%{ box-shadow: 0 0 0 0 rgba(217,165,102,0.5); }
+    70%{ box-shadow: 0 0 0 26px rgba(217,165,102,0); }
+    100%{ box-shadow: 0 0 0 26px rgba(217,165,102,0); }
+  }
+
+  /* ---------- TEXT ZONE ---------- */
+
+  .text-zone{
+    position: relative; width: 100%; min-height: 140px;
+    display: flex; align-items: flex-start; justify-content: center;
+    text-align: center; padding: 0 var(--space-2);
+  }
+
+  .caption{
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+    font-family: 'Fraunces', serif; font-style: italic; font-size: 17px;
+    color: var(--ink-soft-dark);
+    transition: opacity 0.7s ease;
+  }
+  body.dawn .caption{ color: var(--ink-soft-light); }
+  .caption .tap{
+    display: block; margin-top: var(--space-1);
+    font-family: 'Inter', sans-serif; font-style: normal; font-size: 12px;
+    letter-spacing: 0.02em; color: var(--gold);
+  }
+  .caption.hide{ opacity: 0; pointer-events: none; }
+
+  .reason-line{
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+    opacity: 0; transform: translateY(6px);
+    transition: opacity 0.9s var(--ease-slow), transform 0.9s var(--ease-slow);
+  }
+  .reason-line.show{ opacity: 1; transform: translateY(0); }
+  .reason-line .label{
+    font-family: 'Inter', sans-serif; font-size: 11px; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--gold); margin-bottom: var(--space-1);
+  }
+  .reason-line .text{
+    font-family: 'Fraunces', serif; font-size: 19px; line-height: 1.5;
+    color: var(--ink-on-dark); max-width: 260px;
+  }
+  body.dawn .reason-line .text{ color: var(--ink); }
+
+  .final-block{
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+    opacity: 0; transform: translateY(6px);
+    transition: opacity 1.1s var(--ease-slow) 0.4s, transform 1.1s var(--ease-slow) 0.4s;
+  }
+  .final-block.show{ opacity: 1; transform: translateY(0); }
+  .final-block .name{
+    font-family: 'Inter', sans-serif; font-size: 12px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--gold); margin-bottom: var(--space-1);
+  }
+  .final-block .thank-you{
+    font-family: 'Fraunces', serif; font-size: 32px; color: var(--ink); letter-spacing: 0.01em;
+  }
+  .final-block .subtitle{
+    margin-top: var(--space-1);
+    font-family: 'Fraunces', serif; font-style: italic; font-size: 14px;
+    color: var(--ink-soft-light);
+    opacity: 0;
+    transition: opacity 1s ease 1.4s;
+  }
+  .final-block.show .subtitle{ opacity: 1; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+    .seed, .leaf-cluster, .center-mark, .firefly, .mote, .ray, .the-one-flower{ animation: none !important; }
+  }
+
+  .sr-only{
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+
+
+/* Responsive reading area and attachment-based botanical movement. */
+[hidden]{display:none!important}
+chermo-ownership{color:#b7c8bc}body.dawn chermo-ownership{color:#675e55}
+html{height:auto;min-height:100%;overflow-x:clip;overflow-y:auto}
+body{height:auto;min-height:100vh;min-height:100svh;overflow:visible;flex-direction:column;isolation:isolate}
+body.dawn{background:radial-gradient(120% 100% at 50% 30%,var(--night-bg-2),var(--night-bg-1) 70%)}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(120% 100% at 50% 25%,var(--dawn-1),var(--dawn-2) 90%);opacity:0;transition:opacity 2s var(--ease-slow)}
+body.dawn::before{opacity:1}
+.fireflies,.light-layer{overflow:hidden}
+.stage{width:min(100%,760px);height:auto;min-height:calc(100svh - 52px);padding:calc(60px + env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom));flex:1 0 auto}
+.growth-stage{width:100%;display:flex;flex-direction:column;align-items:center}
+.plant-zone{width:280px;max-width:100%;flex-shrink:0}
+.sound-toggle{top:max(12px,env(safe-area-inset-top));right:max(16px,env(safe-area-inset-right));width:46px;height:46px}
+.reading-column{width:100%;display:flex;flex-direction:column;align-items:center;min-width:0}
+.text-zone{display:block;min-height:96px;padding:0 8px;width:min(100%,440px);max-height:clamp(150px,32svh,340px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--gold) transparent;overflow-wrap:anywhere}
+.caption,.reason-line,.final-block{position:relative;inset:auto;width:100%;padding:8px 0;opacity:1;transform:none;transition:none}
+.reason-line .text{max-width:100%;font-size:clamp(18px,2.4vw,21px);white-space:pre-wrap;transition:color 1.8s ease}
+.reason-line.show,.final-block.show{animation:readingIn .5s var(--ease-slow) both}
+.final-block .subtitle{opacity:1;transition:none;line-height:1.6;color:#675e55;white-space:pre-wrap}
+.final-block .name{max-width:100%;line-height:1.6;color:#8a5a22}
+.final-block .thank-you{font-size:clamp(27px,4vw,34px);max-width:100%}
+.caption{line-height:1.6;color:#b7c8bc}
+.actions{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:8px;margin-top:16px;width:100%}
+.action{min-height:46px;min-width:104px;border:1px solid #81937f;border-radius:24px;padding:10px 20px;font:500 13px/1.4 Inter,sans-serif;color:var(--ink-on-dark);background:rgba(255,255,255,.035);cursor:pointer;transition:background .2s,opacity .2s}
+.action:hover{background:rgba(255,255,255,.1)}
+.action:disabled{opacity:.55;cursor:wait}
+.action.secondary{border-color:transparent;color:#b7c8bc}
+body.dawn .action{color:var(--ink);border-color:#ac9c83;background:rgba(255,255,255,.25)}
+button:focus-visible,.text-zone:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
+body.dawn button:focus-visible,body.dawn .text-zone:focus-visible{outline-color:#765322}
+.side-leaf{transform-box:view-box;transform:scale(.05) rotate(-14deg)}
+.side-leaf.sl1{transform-origin:18px 100px}
+.side-leaf.sl2{transform-origin:20px 52px;transform:scale(.05) rotate(11deg);transition-duration:.95s}
+.side-leaf.show{transform:scale(1) rotate(0)}
+.growth-stage.grown .leaf-cluster{transition-delay:1.05s}
+.the-one-flower{animation:none;transform:scale(.82);transform-origin:50% 100%;transition:transform 1.6s var(--ease-bloom),filter 1.6s ease;filter:drop-shadow(0 2px 4px rgba(0,0,0,.25))}
+.growth-stage.bloomed .the-one-flower{transform:scale(1.12) rotate(-4deg)}
+.the-one-flower ellipse{transform-box:fill-box;transform-origin:center;scale:.86;transition:scale 1.5s var(--ease-bloom)}
+.growth-stage.bloomed .the-one-flower ellipse{scale:1}
+.garden-bed{transition:box-shadow 2s ease,opacity 2s ease;box-shadow:0 6px 16px rgba(0,0,0,.2)}
+body.dawn .garden-bed{box-shadow:8px 5px 13px rgba(71,48,26,.12);opacity:.88}
+.resetting *,.resetting::before{transition:none!important;animation:none!important}
+@keyframes readingIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@media(max-height:650px) and (min-width:640px){.stage{width:min(100%,880px);padding-top:58px;padding-bottom:8px}.growth-stage{display:grid;grid-template-columns:280px minmax(0,1fr);gap:20px;align-items:center}.plant-zone{height:272px}.text-zone{max-height:calc(100svh - 180px);min-height:72px}.actions{margin-top:10px}}
+@media(max-width:360px){.plant-zone{height:290px}.stage{padding-left:12px;padding-right:12px}.actions{gap:4px}.action{padding-inline:16px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;transition-delay:0ms!important;animation-duration:.01ms!important;animation-delay:0ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}.grass,.mini-flower{opacity:.85;transform:none;animation:none}.firefly,.mote,.ray,.seed,.leaf-cluster{animation:none!important}}
+
+
+/* Four-leaf botanical specimen: same garden, growth sequence and reading controls. */
+:root{--dawn-1:#f7f4e9;--dawn-2:#e9e4d2;--leaf:#718761;--leaf-deep:#3c583f;--leaf-light:#c0c99c;--gold:#b29b64;--flower-pink:#bb9f8e;--flower-lav:#a9afa0;--flower-gold:#c7b98d}
+.plant-zone{height:340px;margin-bottom:12px}
+.plant-zone::before{content:'';position:absolute;inset:0 1px 0;border:1px solid rgba(164,174,139,.2);border-radius:140px 140px 3px 3px;pointer-events:none}
+body.dawn .plant-zone::before{border-color:rgba(83,101,66,.22);background:linear-gradient(155deg,rgba(255,255,247,.25),transparent 60%)}
+.specimen-label{position:absolute;inset:9px 0 auto;text-align:center;font:italic 19px/1.4 Fraunces,serif;letter-spacing:.015em;color:#d4d7bf}
+.specimen-label span{display:block;margin-top:5px;font:500 7px/1.5 Inter,sans-serif;letter-spacing:.19em;color:#9ead96}
+body.dawn .specimen-label{color:#41543b}body.dawn .specimen-label span{color:#748168}
+.leaf-cluster{bottom:173px}
+.leaf-slot{width:90px;height:108px;margin-left:-45px;margin-top:-108px}
+.leaf-slot.a{transform:rotate(-44deg)}.leaf-slot.b{transform:rotate(46deg)}.leaf-slot.c{transform:rotate(137deg)}.leaf-slot.d{transform:rotate(228deg)}
+.leaf-shape{filter:drop-shadow(1px 3px 2px rgba(10,24,13,.23));transition:transform 1.2s var(--ease-settle),opacity .85s var(--ease-settle)}
+.leaf-slot.a.open .leaf-shape{transform:scale(.98,1.02);opacity:1}.leaf-slot.b.open .leaf-shape{transform:scale(1.03,.97);opacity:1}.leaf-slot.c.open .leaf-shape{transform:scale(.95,1);opacity:1}.leaf-slot.d.open .leaf-shape{transform:scale(1,.95);opacity:1}
+.botanical-leaf{display:block;width:100%;height:100%;overflow:visible}
+.bud-node{width:6px;height:6px;left:-3px;top:-3px;background:#9da47a;box-shadow:0 1px 2px #314631}
+.center-mark{bottom:166px;pointer-events:none}
+#stemPath{stroke-width:2.4}.stem-wrap{bottom:23px}
+.side-leaf.show{opacity:.6}
+.garden-bed{width:206px;height:15px;margin-left:-103px;bottom:17px;background:radial-gradient(ellipse,#67704e55,#293b2522 60%,transparent 75%);box-shadow:none!important}
+.grass{width:1.5px;background:linear-gradient(to top,#66714f,#a0ac82)}
+.mini-flower{opacity:.6;scale:.8}.the-one-flower{scale:.65;opacity:.75}
+.final-block .name{color:#697451}.final-block .thank-you{color:#344735}.final-block .subtitle{color:#59634e;max-width:30ch}
+body.dawn .action{border-color:#9da383;color:#3b4f37;background:#faf9f033}
+body.dawn .caption,body.dawn chermo-ownership{color:#59634e}
+.text-zone{scrollbar-gutter:stable both-edges}
+@media(max-width:360px){.plant-zone{height:330px}}
+@media(max-height:650px) and (min-width:640px){.plant-zone{height:300px;margin-bottom:0}.specimen-label{top:0;font-size:16px}.specimen-label span{font-size:6px;margin-top:2px}.leaf-cluster{bottom:147px}.stem-wrap{height:124px}.center-mark{bottom:140px}.leaf-slot{width:80px;height:96px;margin-left:-40px;margin-top:-96px}}
+@media(prefers-reduced-motion:reduce){.leaf-shape{filter:none}.growth-stage.bloomed .leaf-cluster{animation:none!important}}
+
+</style>
+<!-- CHERMO OWNERSHIP START -->
+<meta name="copyright" content="Copyright © 2026 CHERMO. Original template material only.">
+<script data-chermo-ownership="1">/* CHERMO ownership presentation. No tracking, network access or global copy restrictions. */
+(function () {
+  'use strict';
+  const notice = {"brand":"CHERMO","holder":"CHERMO","year":2026,"version":1,"scope":"Original template designs, artwork, written content, animations, layouts and software created for CHERMO. Customer photographs, personal messages and separately identified third-party material are excluded.","terms":"Authorized customers may personalize, view and share their purchased memory experience. Copying, redistributing, reselling or reusing the original reusable template files or substantial parts of them for another product or service requires permission.","limits":"These measures discourage casual copying. Material displayed in a browser can still be captured or recreated. Third-party fonts, libraries and assets retain their respective rights and licenses."};
+  function mount() {
+    if (document.querySelector('chermo-ownership')) return;
+    const host = document.createElement('chermo-ownership');
+    host.style.cssText = 'display:block;position:relative;clear:both;flex:0 0 auto;max-width:100%;z-index:0';
+    const root = host.attachShadow({ mode: 'open' });
+    const style = document.createElement('style');
+    style.textContent = 'details{box-sizing:border-box;margin:0;padding:12px 16px;text-align:center;font:12px/1.6 system-ui,sans-serif;color:inherit;background:transparent}summary{cursor:pointer;min-height:28px;align-content:center;list-style-position:inside;overflow-wrap:anywhere}summary:focus-visible{outline:2px solid currentColor;outline-offset:3px}p{max-width:70ch;margin:10px auto;text-align:left;overflow-wrap:anywhere}';
+    const details = document.createElement('details');
+    const summary = document.createElement('summary');
+    summary.textContent = `Copyright © ${notice.year} ${notice.holder}. All rights reserved.`;
+    details.append(summary);
+    for (const text of [notice.scope, notice.terms, notice.limits]) {
+      const p = document.createElement('p'); p.textContent = text; details.append(p);
+    }
+    root.append(style, details); document.body.append(host);
+    // Scroll-locked cinematic scenes cannot reach a footer below the viewport.
+    // Use a small corner disclosure there, avoiding existing interactive controls.
+    const scrollLocked = [document.body, document.documentElement].some(el => ['hidden','clip'].includes(getComputedStyle(el).overflowY));
+    if (scrollLocked) {
+      const obstacles = [...document.querySelectorAll('button,a,input,textarea,select,[tabindex="0"]')].map(el => el.getBoundingClientRect()).filter(r => r.width && r.height);
+      const positions = [{bottom:8,right:8},{bottom:8,left:8},{top:8,right:8},{top:8,left:8}];
+      const position = positions.find(p => {
+        const x=p.left??Math.max(0,innerWidth-168), y=p.top??Math.max(0,innerHeight-44);
+        return !obstacles.some(r=>r.left<x+160&&r.right>x&&r.top<y+36&&r.bottom>y);
+      }) || positions[0];
+      host.style.position='fixed';host.style.zIndex='30';host.style.maxWidth='min(340px,calc(100vw - 16px))';
+      for(const [key,value] of Object.entries(position))host.style[key]=`${value}px`;
+      summary.textContent=`© ${notice.year} ${notice.brand} · Rights`;
+      style.textContent+='details{padding:4px 9px;border:1px solid GrayText;border-radius:4px;max-height:65svh;overflow:auto;color:CanvasText;background:Canvas}summary{min-height:24px}';
+      const p=document.createElement('p');p.textContent=`Copyright © ${notice.year} ${notice.holder}. All rights reserved.`;details.insertBefore(p,summary.nextSibling);
+    }
+    // Only explicitly marked, original presentation art is affected. Inputs,
+    // customer photos, page gestures, copy commands and context menus are untouched.
+    document.addEventListener('dragstart', event => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (target.closest('input,textarea,[contenteditable="true"],a,button,[data-customer-content]')) return;
+      if (target.closest('[data-chermo-artwork]')) event.preventDefault();
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount, { once: true });
+  else mount();
+})();
+</script>
+<!-- CHERMO OWNERSHIP END -->
+</head>
+<body>
+
+<div class="stars"></div>
+<div class="fireflies">
+  <span class="firefly f1"></span>
+  <span class="firefly f2"></span>
+  <span class="firefly f3"></span>
+  <span class="firefly f4"></span>
+  <span class="firefly f5"></span>
+  <span class="firefly f6"></span>
+</div>
+<div class="light-layer">
+  <div class="ray r1"></div>
+  <div class="ray r2"></div>
+  <div class="mote m1"></div>
+  <div class="mote m2"></div>
+  <div class="mote m3"></div>
+  <div class="mote m4"></div>
+  <div class="mote m5"></div>
+</div>
+<div class="grain"></div>
+<div aria-live="polite" class="sr-only" id="live"></div>
+
+<main class="stage" aria-label="The Bloom">
+
+  <button class="sound-toggle" id="soundToggle" aria-pressed="false" aria-label="Turn chime sound on">🔇</button>
+
+  <div class="growth-stage" id="growthStage">
+
+    <div class="plant-zone" aria-hidden="true" data-chermo-artwork>
+      <div class="specimen-label">The Bloom<span>A LITTLE LUCK, GROWN FOR YOU</span></div>
+
+      <div class="garden-bed"></div>
+      <div class="grass g1"></div>
+      <div class="grass g2"></div>
+      <div class="grass g3"></div>
+      <div class="grass g4"></div>
+      <div class="grass g5"></div>
+
+      <svg class="mini-flower mf1" viewBox="0 0 40 40">
+        <g>
+          <ellipse cx="20" cy="10" rx="6" ry="9" fill="var(--flower-lav)" transform="rotate(0 20 20)"/>
+          <ellipse cx="20" cy="10" rx="6" ry="9" fill="var(--flower-lav)" transform="rotate(72 20 20)"/>
+          <ellipse cx="20" cy="10" rx="6" ry="9" fill="var(--flower-lav)" transform="rotate(144 20 20)"/>
+          <ellipse cx="20" cy="10" rx="6" ry="9" fill="var(--flower-lav)" transform="rotate(216 20 20)"/>
+          <ellipse cx="20" cy="10" rx="6" ry="9" fill="var(--flower-lav)" transform="rotate(288 20 20)"/>
+          <circle cx="20" cy="20" r="4" fill="var(--flower-gold)"/>
+        </g>
+      </svg>
+
+      <svg class="mini-flower mf2" viewBox="0 0 40 40">
+        <g>
+          <ellipse cx="20" cy="10" rx="5" ry="8" fill="var(--flower-gold)" transform="rotate(0 20 20)"/>
+          <ellipse cx="20" cy="10" rx="5" ry="8" fill="var(--flower-gold)" transform="rotate(72 20 20)"/>
+          <ellipse cx="20" cy="10" rx="5" ry="8" fill="var(--flower-gold)" transform="rotate(144 20 20)"/>
+          <ellipse cx="20" cy="10" rx="5" ry="8" fill="var(--flower-gold)" transform="rotate(216 20 20)"/>
+          <ellipse cx="20" cy="10" rx="5" ry="8" fill="var(--flower-gold)" transform="rotate(288 20 20)"/>
+          <circle cx="20" cy="20" r="3.5" fill="var(--flower-pink)"/>
+        </g>
+      </svg>
+
+      <svg class="the-one-flower" viewBox="0 0 40 40">
+        <g>
+          <ellipse cx="20" cy="9" rx="7" ry="10" fill="var(--flower-pink)" transform="rotate(0 20 20)"/>
+          <ellipse cx="20" cy="9" rx="7" ry="10" fill="var(--flower-pink)" transform="rotate(72 20 20)"/>
+          <ellipse cx="20" cy="9" rx="7" ry="10" fill="var(--flower-pink)" transform="rotate(144 20 20)"/>
+          <ellipse cx="20" cy="9" rx="7" ry="10" fill="var(--flower-pink)" transform="rotate(216 20 20)"/>
+          <ellipse cx="20" cy="9" rx="7" ry="10" fill="var(--flower-pink)" transform="rotate(288 20 20)"/>
+          <circle cx="20" cy="20" r="4.5" fill="var(--gold)"/>
+        </g>
+      </svg>
+
+      <div class="seed" id="seed"></div>
+
+      <div class="stem-wrap">
+        <svg viewBox="0 0 40 150">
+          <defs>
+            <linearGradient id="stemGrad" x1="0" y1="1" x2="0" y2="0">
+              <stop offset="0%" stop-color="var(--leaf-deep)"/>
+              <stop offset="100%" stop-color="var(--leaf)"/>
+            </linearGradient>
+          </defs>
+          <path id="stemPath" d="M20,148 C14,120 26,95 18,68 C12,46 24,24 20,4"/>
+          <path class="side-leaf sl1" id="sideLeaf1" d="M18,100 C6,96 0,84 8,76 C15,72 21,82 18,100 Z" fill="var(--leaf)"/>
+          <path class="side-leaf sl2" id="sideLeaf2" d="M20,52 C32,48 38,36 30,28 C23,24 17,34 20,52 Z" fill="var(--leaf)"/>
+        </svg>
+      </div>
+
+      <div class="leaf-cluster" id="leafCluster">
+        <div class="bud-node"></div>
+        <div class="leaf-slot a" id="leaf1">
+          <div class="leaf-shape">
+            <svg viewBox="0 0 90 120" class="botanical-leaf" focusable="false">
+              <defs>
+                <linearGradient id="leafGrad" x1=".18" y1="0" x2=".83" y2="1"><stop stop-color="#c3c99c"/><stop offset=".44" stop-color="#64825b"/><stop offset="1" stop-color="#344f38"/></linearGradient>
+                <clipPath id="cloverEdge1"><path d="M45 116 C33 101 14 82 7 59 C1 40 3 19 17 10 C28 3 41 10 45 24 C50 9 63 3 75 13 C91 27 86 49 79 68 C70 89 55 105 45 116 Z"/></clipPath>
+                <pattern id="cloverPaper1" width="11" height="13" patternUnits="userSpaceOnUse"><circle cx="2" cy="3" r=".4" fill="#ecdfb0"/><circle cx="8" cy="9" r=".3" fill="#243d2a"/><path d="M5 1 l1 .5 M1 10 l.7 -.5" stroke="#deddb0" stroke-width=".4"/></pattern>
+              </defs>
+              <path class="leaf-blade" d="M45 116 C33 101 14 82 7 59 C1 40 3 19 17 10 C28 3 41 10 45 24 C50 9 63 3 75 13 C91 27 86 49 79 68 C70 89 55 105 45 116 Z" fill="url(#leafGrad)" stroke="#314d36" stroke-width=".8"/>
+              <g clip-path="url(#cloverEdge1)" fill="none" stroke-linecap="round">
+                <rect width="90" height="120" fill="url(#cloverPaper1)" opacity=".45"/>
+                <path d="M13 49 Q29 41 45 56 Q61 42 79 49" stroke="#e3e4c0" stroke-width="5" opacity=".27"/>
+                <path d="M12 53 Q30 46 45 59 Q61 46 80 53" stroke="#b7c79c" stroke-width="1.2" opacity=".52"/>
+                <path d="M45 116 Q48 78 45 26" stroke="#e2ddad" stroke-width="1" opacity=".74"/>
+                <path d="M46 113 Q48 77 46 29" stroke="#27452f" stroke-width=".65" opacity=".65"/>
+                <path d="M45 44 Q30.7 34 15 22 M45 44 Q59.2 34 75 22 M45 55 Q29.8 45 10 33 M45 55 Q59.9 45 80 33 M45 66 Q28.9 56 12 44 M45 66 Q60.6 56 78 44 M45 77 Q28.0 67 17 55 M45 77 Q61.2 67 73 55 M45 88 Q27.2 78 23 66 M45 88 Q61.9 78 67 66 M45 99 Q26.3 89 31 77 M45 99 Q62.5 89 59 77" stroke="#e0dfb6" stroke-width=".65" opacity=".5"/>
+                <path d="M20 21 Q9 38 14 55 M74 21 Q83 36 78 50 M14 65 Q25 87 39 101" stroke="#e1dfb1" stroke-width=".7" opacity=".42"/>
+                <path d="M31 39 l-7 -11 M59 39 l8 -12 M27 53 l-9 -13 M63 53 l9 -13 M29 66 l-9 -10 M62 66 l8 -11 M34 80 l-7 -11 M57 80 l7 -10" stroke="#314a32" stroke-width=".5" opacity=".3"/>
+              </g>
+              <path d="M45 115 L45 120" stroke="#5f7550" stroke-width="1.8"/>
+            </svg>
+          </div>
+        </div>
+        <div class="leaf-slot b" id="leaf2">
+          <div class="leaf-shape">
+            <svg viewBox="0 0 90 120" class="botanical-leaf" focusable="false">
+              <defs>
+                <linearGradient id="cloverWash2" x1=".18" y1="0" x2=".83" y2="1"><stop stop-color="#b7c391"/><stop offset=".44" stop-color="#577650"/><stop offset="1" stop-color="#2b4733"/></linearGradient>
+                <clipPath id="cloverEdge2"><path d="M45 116 C29 101 11 81 6 59 C1 39 6 18 20 10 C32 4 42 13 46 26 C51 12 63 5 75 14 C87 25 88 44 80 65 C72 88 56 104 45 116 Z"/></clipPath>
+                <pattern id="cloverPaper2" width="11" height="13" patternUnits="userSpaceOnUse"><circle cx="2" cy="3" r=".4" fill="#ecdfb0"/><circle cx="8" cy="9" r=".3" fill="#243d2a"/><path d="M5 1 l1 .5 M1 10 l.7 -.5" stroke="#deddb0" stroke-width=".4"/></pattern>
+              </defs>
+              <path class="leaf-blade" d="M45 116 C29 101 11 81 6 59 C1 39 6 18 20 10 C32 4 42 13 46 26 C51 12 63 5 75 14 C87 25 88 44 80 65 C72 88 56 104 45 116 Z" fill="url(#cloverWash2)" stroke="#314d36" stroke-width=".8"/>
+              <g clip-path="url(#cloverEdge2)" fill="none" stroke-linecap="round">
+                <rect width="90" height="120" fill="url(#cloverPaper2)" opacity=".45"/>
+                <path d="M13 49 Q29 41 45 56 Q61 42 79 49" stroke="#e3e4c0" stroke-width="5" opacity=".27"/>
+                <path d="M12 53 Q30 46 45 59 Q61 46 80 53" stroke="#b7c79c" stroke-width="1.2" opacity=".52"/>
+                <path d="M45 116 Q48 78 45 26" stroke="#e2ddad" stroke-width="1" opacity=".74"/>
+                <path d="M46 113 Q48 77 46 29" stroke="#27452f" stroke-width=".65" opacity=".65"/>
+                <path d="M45 44 Q30.7 34 15 22 M45 44 Q59.2 34 75 22 M45 55 Q29.8 45 10 33 M45 55 Q59.9 45 80 33 M45 66 Q28.9 56 12 44 M45 66 Q60.6 56 78 44 M45 77 Q28.0 67 17 55 M45 77 Q61.2 67 73 55 M45 88 Q27.2 78 23 66 M45 88 Q61.9 78 67 66 M45 99 Q26.3 89 31 77 M45 99 Q62.5 89 59 77" stroke="#e0dfb6" stroke-width=".65" opacity=".5"/>
+                <path d="M20 21 Q9 38 14 55 M74 21 Q83 36 78 50 M14 65 Q25 87 39 101" stroke="#e1dfb1" stroke-width=".7" opacity=".42"/>
+                <path d="M31 39 l-7 -11 M59 39 l8 -12 M27 53 l-9 -13 M63 53 l9 -13 M29 66 l-9 -10 M62 66 l8 -11 M34 80 l-7 -11 M57 80 l7 -10" stroke="#314a32" stroke-width=".5" opacity=".3"/>
+              </g>
+              <path d="M45 115 L45 120" stroke="#5f7550" stroke-width="1.8"/>
+            </svg>
+          </div>
+        </div>
+        <div class="leaf-slot c" id="leaf3">
+          <div class="leaf-shape">
+            <svg viewBox="0 0 90 120" class="botanical-leaf" focusable="false">
+              <defs>
+                <linearGradient id="cloverWash3" x1=".18" y1="0" x2=".83" y2="1"><stop stop-color="#a8b988"/><stop offset=".44" stop-color="#51734d"/><stop offset="1" stop-color="#304c38"/></linearGradient>
+                <clipPath id="cloverEdge3"><path d="M45 116 C32 99 14 82 8 61 C2 43 3 22 17 12 C28 4 40 10 45 25 C51 9 65 6 76 17 C88 29 86 49 78 69 C69 88 55 105 45 116 Z"/></clipPath>
+                <pattern id="cloverPaper3" width="11" height="13" patternUnits="userSpaceOnUse"><circle cx="2" cy="3" r=".4" fill="#ecdfb0"/><circle cx="8" cy="9" r=".3" fill="#243d2a"/><path d="M5 1 l1 .5 M1 10 l.7 -.5" stroke="#deddb0" stroke-width=".4"/></pattern>
+              </defs>
+              <path class="leaf-blade" d="M45 116 C32 99 14 82 8 61 C2 43 3 22 17 12 C28 4 40 10 45 25 C51 9 65 6 76 17 C88 29 86 49 78 69 C69 88 55 105 45 116 Z" fill="url(#cloverWash3)" stroke="#314d36" stroke-width=".8"/>
+              <g clip-path="url(#cloverEdge3)" fill="none" stroke-linecap="round">
+                <rect width="90" height="120" fill="url(#cloverPaper3)" opacity=".45"/>
+                <path d="M13 49 Q29 41 45 56 Q61 42 79 49" stroke="#e3e4c0" stroke-width="5" opacity=".27"/>
+                <path d="M12 53 Q30 46 45 59 Q61 46 80 53" stroke="#b7c79c" stroke-width="1.2" opacity=".52"/>
+                <path d="M45 116 Q48 78 45 26" stroke="#e2ddad" stroke-width="1" opacity=".74"/>
+                <path d="M46 113 Q48 77 46 29" stroke="#27452f" stroke-width=".65" opacity=".65"/>
+                <path d="M45 44 Q30.7 34 15 22 M45 44 Q59.2 34 75 22 M45 55 Q29.8 45 10 33 M45 55 Q59.9 45 80 33 M45 66 Q28.9 56 12 44 M45 66 Q60.6 56 78 44 M45 77 Q28.0 67 17 55 M45 77 Q61.2 67 73 55 M45 88 Q27.2 78 23 66 M45 88 Q61.9 78 67 66 M45 99 Q26.3 89 31 77 M45 99 Q62.5 89 59 77" stroke="#e0dfb6" stroke-width=".65" opacity=".5"/>
+                <path d="M20 21 Q9 38 14 55 M74 21 Q83 36 78 50 M14 65 Q25 87 39 101" stroke="#e1dfb1" stroke-width=".7" opacity=".42"/>
+                <path d="M31 39 l-7 -11 M59 39 l8 -12 M27 53 l-9 -13 M63 53 l9 -13 M29 66 l-9 -10 M62 66 l8 -11 M34 80 l-7 -11 M57 80 l7 -10" stroke="#314a32" stroke-width=".5" opacity=".3"/>
+              </g>
+              <path d="M45 115 L45 120" stroke="#5f7550" stroke-width="1.8"/>
+            </svg>
+          </div>
+        </div>
+        <div class="leaf-slot d" id="leaf4">
+          <div class="leaf-shape">
+            <svg viewBox="0 0 90 120" class="botanical-leaf" focusable="false">
+              <defs>
+                <linearGradient id="cloverWash4" x1=".18" y1="0" x2=".83" y2="1"><stop stop-color="#c6ceaa"/><stop offset=".44" stop-color="#738e62"/><stop offset="1" stop-color="#3a5841"/></linearGradient>
+                <clipPath id="cloverEdge4"><path d="M45 116 C31 101 13 81 7 60 C0 39 7 18 20 11 C33 4 42 14 46 27 C51 13 61 6 72 12 C87 21 88 42 81 62 C72 85 57 105 45 116 Z"/></clipPath>
+                <pattern id="cloverPaper4" width="11" height="13" patternUnits="userSpaceOnUse"><circle cx="2" cy="3" r=".4" fill="#ecdfb0"/><circle cx="8" cy="9" r=".3" fill="#243d2a"/><path d="M5 1 l1 .5 M1 10 l.7 -.5" stroke="#deddb0" stroke-width=".4"/></pattern>
+              </defs>
+              <path class="leaf-blade" d="M45 116 C31 101 13 81 7 60 C0 39 7 18 20 11 C33 4 42 14 46 27 C51 13 61 6 72 12 C87 21 88 42 81 62 C72 85 57 105 45 116 Z" fill="url(#cloverWash4)" stroke="#314d36" stroke-width=".8"/>
+              <g clip-path="url(#cloverEdge4)" fill="none" stroke-linecap="round">
+                <rect width="90" height="120" fill="url(#cloverPaper4)" opacity=".45"/>
+                <path d="M13 49 Q29 41 45 56 Q61 42 79 49" stroke="#e3e4c0" stroke-width="5" opacity=".27"/>
+                <path d="M12 53 Q30 46 45 59 Q61 46 80 53" stroke="#b7c79c" stroke-width="1.2" opacity=".52"/>
+                <path d="M45 116 Q48 78 45 26" stroke="#e2ddad" stroke-width="1" opacity=".74"/>
+                <path d="M46 113 Q48 77 46 29" stroke="#27452f" stroke-width=".65" opacity=".65"/>
+                <path d="M45 44 Q30.7 34 15 22 M45 44 Q59.2 34 75 22 M45 55 Q29.8 45 10 33 M45 55 Q59.9 45 80 33 M45 66 Q28.9 56 12 44 M45 66 Q60.6 56 78 44 M45 77 Q28.0 67 17 55 M45 77 Q61.2 67 73 55 M45 88 Q27.2 78 23 66 M45 88 Q61.9 78 67 66 M45 99 Q26.3 89 31 77 M45 99 Q62.5 89 59 77" stroke="#e0dfb6" stroke-width=".65" opacity=".5"/>
+                <path d="M20 21 Q9 38 14 55 M74 21 Q83 36 78 50 M14 65 Q25 87 39 101" stroke="#e1dfb1" stroke-width=".7" opacity=".42"/>
+                <path d="M31 39 l-7 -11 M59 39 l8 -12 M27 53 l-9 -13 M63 53 l9 -13 M29 66 l-9 -10 M62 66 l8 -11 M34 80 l-7 -11 M57 80 l7 -10" stroke="#314a32" stroke-width=".5" opacity=".3"/>
+              </g>
+              <path d="M45 115 L45 120" stroke="#5f7550" stroke-width="1.8"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="center-mark"></div>
+    </div>
+
+<div class="reading-column">
+<div class="text-zone" id="textZone" tabindex="0" role="region" aria-label="Your garden message">
+<div class="caption" id="caption"></div>
+<div class="reason-line" id="reasonLine" hidden inert><span class="label">Because</span><span class="text" id="reasonText"></span></div>
+<div class="final-block" id="finalBlock" hidden inert><span class="name" id="finalName"></span><span class="thank-you" id="thankYou"></span><span class="subtitle" id="closingMessage"></span></div>
+</div>
+<div class="actions"><button type="button" class="action" id="continueButton">Begin growing</button><button type="button" class="action secondary" id="replayButton" hidden>Grow again</button></div>
+</div></div></main>
+
+<script>
+// Personalisation: plain text only. Supply any non-empty reasons array. Empty optional
+// recipientName/closingMessage hides that line. Invalid/empty reasons use original defaults.
+const BLOOM_CONTENT = {
+  recipientName:'RIYA', introduction:'Since I met you, life has felt a little luckier.',
+  reasons:['you chose me on the days I made it hard to.','you remembered the small things I thought no one noticed.',"you loved me steady, even when I couldn't love myself the same way."],
+  gratitude:'Thank you.', closingMessage:'I never went looking for a four-leaf clover.\nThen I met you.'
+};
+(() => {
+'use strict';
+const $=id=>document.getElementById(id);
+const live=$('live'),growth=$('growthStage'),textZone=$('textZone'),caption=$('caption'),reasonLine=$('reasonLine'),reasonText=$('reasonText'),finalBlock=$('finalBlock'),next=$('continueButton'),replay=$('replayButton'),soundToggle=$('soundToggle'),stem=$('stemPath');
+const leaves=[1,2,3,4].map(n=>$('leaf'+n)),sideLeaves=[$('sideLeaf1'),$('sideLeaf2')],motion=matchMedia('(prefers-reduced-motion: reduce)');
+const defaults=['you chose me on the days I made it hard to.','you remembered the small things I thought no one noticed.',"you loved me steady, even when I couldn't love myself the same way."];
+const supplied=Array.isArray(BLOOM_CONTENT.reasons)?BLOOM_CONTENT.reasons.filter(v=>typeof v==='string'&&v.trim()):[];
+const reasons=supplied.length?supplied:defaults, text=(v,f='')=>typeof v==='string'?v:f;
+const intro=text(BLOOM_CONTENT.introduction,'Since I met you, life has felt a little luckier.'),name=text(BLOOM_CONTENT.recipientName),closing=text(BLOOM_CONTENT.closingMessage);
+$('finalName').textContent=name;$('finalName').hidden=!name.trim();$('thankYou').textContent=text(BLOOM_CONTENT.gratitude,'Thank you.')||'Thank you.';$('closingMessage').textContent=closing;$('closingMessage').hidden=!closing.trim();
+const stemLength=typeof stem.getTotalLength==='function'?stem.getTotalLength():150;stem.style.strokeDasharray=String(stemLength);
+let phase='seed',index=-1,generation=0,locked=false;const timers=new Set();
+function later(fn,ms){const token=generation;const timer=setTimeout(()=>{timers.delete(timer);if(token===generation)fn();},ms);timers.add(timer);}
+function cancel(){generation++;timers.forEach(clearTimeout);timers.clear();}
+function reading(el){[caption,reasonLine,finalBlock].forEach(item=>{item.hidden=item!==el;item.inert=item!==el;});textZone.scrollTop=0;}
+function lock(duration,done){locked=true;next.disabled=true;next.setAttribute('aria-busy','true');later(()=>{if(done)done();locked=false;next.disabled=false;next.removeAttribute('aria-busy');},motion.matches?180:duration);}
+// No audio exists until the recipient explicitly opts in.
+let soundOn=false,audioCtx=null,audioVersion=0;const voices=new Set();
+function soundLabel(){soundToggle.textContent=soundOn?'\u{1F514}':'\u{1F507}';soundToggle.setAttribute('aria-pressed',String(soundOn));soundToggle.setAttribute('aria-label',soundOn?'Turn chime sound off':'Turn chime sound on');}
+function stopSound(){audioVersion++;soundOn=false;voices.forEach(({osc,gain})=>{try{osc.stop();}catch{}osc.disconnect();gain.disconnect();});voices.clear();const old=audioCtx;audioCtx=null;if(old&&old.state!=='closed'){try{Promise.resolve(old.close()).catch(()=>{});}catch{}}soundLabel();soundToggle.disabled=false;}
+function audioFailure(){stopSound();live.textContent='Sound is unavailable. Your garden can still grow quietly.';}
+soundToggle.addEventListener('click',async()=>{if(soundOn){stopSound();return;}const Audio=window.AudioContext||window.webkitAudioContext;if(!Audio){audioFailure();return;}const token=++audioVersion;soundToggle.disabled=true;try{const context=new Audio();audioCtx=context;await context.resume();if(token!==audioVersion)return;if(context.state!=='running')throw new Error('Audio did not start');soundOn=true;soundLabel();chime(523.25);}catch{if(token===audioVersion)audioFailure();}finally{if(token===audioVersion)soundToggle.disabled=false;}});
+function chime(frequency){if(!soundOn||!audioCtx||audioCtx.state!=='running')return;try{const now=audioCtx.currentTime;[[frequency,.085,1.35],[frequency*2.01,.022,1]].forEach(([freq,volume,length])=>{const osc=audioCtx.createOscillator(),gain=audioCtx.createGain(),voice={osc,gain};voices.add(voice);osc.type='sine';osc.frequency.value=freq;gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(volume,now+.045);gain.gain.exponentialRampToValueAtTime(.0001,now+length);osc.connect(gain);gain.connect(audioCtx.destination);osc.onended=()=>{voices.delete(voice);osc.disconnect();gain.disconnect();};osc.start(now);osc.stop(now+length+.05);});}catch{audioFailure();}}
+function reset(){cancel();stopSound();locked=false;phase='seed';index=-1;document.body.classList.add('resetting');document.body.classList.remove('dawn');growth.classList.remove('grown','bloomed');leaves.forEach(el=>el.classList.remove('open'));sideLeaves.forEach(el=>el.classList.remove('show'));stem.style.transition='none';stem.style.strokeDashoffset=String(stemLength);reasonLine.classList.remove('show');finalBlock.classList.remove('show');reasonText.textContent='';caption.textContent=intro;reading(caption);live.textContent='';next.hidden=false;next.disabled=false;next.removeAttribute('aria-busy');next.textContent='Begin growing';replay.hidden=true;
+// One layout flush per reset, never per animation frame or letter.
+void growth.offsetWidth;document.body.classList.remove('resetting');}
+function advance(){if(locked||phase==='final')return;if(phase==='seed'){phase='stem';growth.classList.add('grown');replay.hidden=false;next.textContent='Growing...';stem.style.transition='stroke-dashoffset 1.35s cubic-bezier(.22,.61,.36,1)';stem.style.strokeDashoffset='0';later(()=>sideLeaves[0].classList.add('show'),motion.matches?0:500);later(()=>sideLeaves[1].classList.add('show'),motion.matches?0:1000);live.textContent='A stem grows toward the light.';lock(1450,()=>{phase='reason';next.textContent='Let it grow';});return;}
+if(index<reasons.length-1){index++;const count=Math.max(1,Math.ceil((index+1)*(leaves.length-1)/reasons.length));leaves.slice(0,count).forEach(el=>el.classList.add('open'));reasonText.textContent=reasons[index];reasonLine.dataset.step=String(index+1);reading(reasonLine);reasonLine.classList.add('show');live.textContent='Because '+reasons[index];next.textContent=index===reasons.length-1?'Welcome the dawn':'Let it grow';chime([523.25,659.25,783.99][Math.min(index,2)]);lock(1500);return;}
+phase='dawn';leaves.forEach(el=>el.classList.add('open'));next.textContent='Welcoming the dawn...';document.body.classList.add('dawn');growth.classList.add('bloomed');lock(2100,()=>{phase='final';reading(finalBlock);finalBlock.classList.add('show');next.hidden=true;live.textContent=['Four heart-shaped leaves unfold into a clover.',name,$('thankYou').textContent,closing].filter(Boolean).join(' ');replay.focus({preventScroll:true});});}
+next.addEventListener('click',advance);replay.addEventListener('click',()=>{reset();next.focus({preventScroll:true});});window.addEventListener('pagehide',()=>{cancel();stopSound();});window.addEventListener('pageshow',event=>{if(event.persisted)reset();});reset();
+})();
+</script>
+
+</body>
+</html>
